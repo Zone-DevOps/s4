@@ -1,0 +1,110 @@
+name: Initialize New Scenario
+
+on:
+  workflow_dispatch:
+    inputs:
+      scenario_name:
+        description: 'Name for the new scenario'
+        required: true
+        default: 'experiment'
+      template:
+        description: 'Template to use (default, random, zeros)'
+        required: false
+        default: 'default'
+      random_seed:
+        description: 'Random seed for initialization'
+        required: false
+        default: '719'
+
+jobs:
+  initialize:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Initialize scenario
+      run: |
+        python -c "
+        from src.state_matrix import TriadicStateMatrix
+        from pathlib import Path
+        import json
+        import numpy as np
+        from datetime import datetime
+        
+        # Set random seed
+        np.random.seed(int('${{ github.event.inputs.random_seed }}'))
+        
+        # Create new scenario
+        scenario_name = '${{ github.event.inputs.scenario_name }}'
+        template = '${{ github.event.inputs.template }}'
+        
+        # Initialize state matrix
+        matrix = TriadicStateMatrix(scenario_name)
+        
+        # Create scenario file
+        scenario = {
+            'metadata': {
+                'name': scenario_name,
+                'template': template,
+                'created': datetime.utcnow().isoformat(),
+                'seed': int('${{ github.event.inputs.random_seed }}'),
+                'description': 'System 4 triadic transformation with A000081 architecture'
+            },
+            'initial_state': matrix.state_matrix.tolist(),
+            'phase_offsets': [0, 1, 2],
+            'transformation_rules': {
+                'past_actual': 'measure_and_consolidate',
+                'present_real': 'bind_and_commit',
+                'future_virtual': 'project_and_explore'
+            }
+        }
+        
+        # Initialize based on template
+        if template == 'random':
+            scenario['initial_state'] = np.random.randn(3, 4, 9).tolist()
+        elif template == 'zeros':
+            scenario['initial_state'] = np.zeros((3, 4, 9)).tolist()
+        else:
+            # Default: small random perturbations
+            scenario['initial_state'] = (np.random.randn(3, 4, 9) * 0.1).tolist()
+        
+        # Save scenario
+        scenario_path = Path('scenarios') / f'{scenario_name}.json'
+        with open(scenario_path, 'w') as f:
+            json.dump(scenario, f, indent=2)
+        
+        # Initialize and save first state
+        matrix.initialize_from_scenario(scenario_path)
+        state_path = Path('states') / f'{scenario_name}_step_000.json'
+        matrix.save_state(state_path)
+        
+        # Create initial log
+        log_path = Path('logs') / f'{scenario_name}_init.log'
+        with open(log_path, 'w') as f:
+            f.write(f'Scenario: {scenario_name}\n')
+            f.write(f'Template: {template}\n')
+            f.write(f'Seed: {int(\"${{ github.event.inputs.random_seed }}\")}\n')
+            f.write(f'Created: {datetime.utcnow().isoformat()}\n')
+            f.write(f'Initial state saved to: {state_path}\n')
+        
+        print(f'Initialized scenario: {scenario_name}')
+        "
+    
+    - name: Commit new scenario
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add scenarios/*.json states/*.json logs/*.log
+        git diff --staged --quiet || git commit -m "Initialize scenario: ${{ github.event.inputs.scenario_name }}"
+        git push

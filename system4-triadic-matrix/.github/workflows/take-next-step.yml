@@ -1,0 +1,138 @@
+name: Take Next Step
+
+on:
+  workflow_dispatch:
+    inputs:
+      scenario_name:
+        description: 'Scenario name to advance'
+        required: true
+        default: 'default'
+      steps_to_take:
+        description: 'Number of steps to take (1-12)'
+        required: false
+        default: '1'
+
+jobs:
+  step:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Take transformation step(s)
+      run: |
+        python -c "
+        from src.state_matrix import TriadicStateMatrix
+        from pathlib import Path
+        import json
+        import glob
+        from datetime import datetime
+        
+        scenario_name = '${{ github.event.inputs.scenario_name }}'
+        steps_to_take = int('${{ github.event.inputs.steps_to_take }}')
+        
+        # Find latest state file
+        state_files = sorted(glob.glob(f'states/{scenario_name}_step_*.json'))
+        if not state_files:
+            raise FileNotFoundError(f'No state files found for scenario: {scenario_name}')
+        
+        latest_state = state_files[-1]
+        print(f'Loading state from: {latest_state}')
+        
+        # Load matrix
+        matrix = TriadicStateMatrix(scenario_name)
+        matrix.load_state(Path(latest_state))
+        
+        # Take steps
+        for i in range(steps_to_take):
+            # Perform step
+            step_log = matrix.step()
+            
+            # Save state
+            step_num = matrix.global_step
+            state_path = Path('states') / f'{scenario_name}_step_{step_num:03d}.json'
+            matrix.save_state(state_path)
+            
+            # Save step log
+            log_path = Path('logs') / f'{scenario_name}_step_{step_num:03d}.json'
+            with open(log_path, 'w') as f:
+                json.dump(step_log, f, indent=2)
+            
+            # Print summary
+            print(f'Step {step_num} complete:')
+            print(f'  Cycle: {step_log[\"cycle\"]}')
+            print(f'  Phase: {step_log[\"phase\"]}')
+            print(f'  Relevance: {step_log[\"relevance_score\"]:.4f}')
+            print(f'  Alignment: {step_log[\"performance\"][\"alignment\"]:.4f}')
+            
+            # Check if transformation complete
+            if matrix.global_step >= 12:
+                print(f'Transformation complete after {matrix.global_step} steps!')
+                
+                # Create completion report
+                report = {
+                    'scenario': scenario_name,
+                    'total_steps': matrix.global_step,
+                    'completed': datetime.utcnow().isoformat(),
+                    'final_performance': matrix.accuracy_metrics,
+                    'performance_history': matrix.performance_history
+                }
+                
+                report_path = Path('logs') / f'{scenario_name}_completion.json'
+                with open(report_path, 'w') as f:
+                    json.dump(report, f, indent=2)
+                
+                break
+        
+        print(f'Completed {min(steps_to_take, 12 - matrix.global_step + 1)} steps')
+        "
+    
+    - name: Generate step visualization
+      run: |
+        python -c "
+        import json
+        import glob
+        from pathlib import Path
+        
+        scenario_name = '${{ github.event.inputs.scenario_name }}'
+        
+        # Get latest step log
+        log_files = sorted(glob.glob(f'logs/{scenario_name}_step_*.json'))
+        if log_files:
+            with open(log_files[-1], 'r') as f:
+                step_log = json.load(f)
+            
+            # Create simple ASCII visualization
+            vis = []
+            vis.append('=' * 50)
+            vis.append(f'Scenario: {scenario_name}')
+            vis.append(f'Global Step: {step_log[\"global_step\"]}')
+            vis.append(f'Cycle {step_log[\"cycle\"]}, Phase {step_log[\"phase\"]}')
+            vis.append('=' * 50)
+            vis.append('Concurrent Set Positions:')
+            for i, pos in enumerate(step_log[\"set_positions\"]):
+                vis.append(f'  Set {i}: Step {pos}')
+            vis.append(f'Relevance Score: {step_log[\"relevance_score\"]:.4f}')
+            vis.append(f'Alignment: {step_log[\"performance\"][\"alignment\"]:.4f}')
+            vis.append('=' * 50)
+            
+            print('\n'.join(vis))
+        "
+    
+    - name: Commit step results
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add states/*.json logs/*.json logs/*.log
+        git diff --staged --quiet || git commit -m "Step taken for scenario: ${{ github.event.inputs.scenario_name }}"
+        git push
