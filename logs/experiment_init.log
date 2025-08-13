@@ -1,0 +1,5 @@
+Scenario: experiment
+Template: default
+Seed: 719
+Created: 2025-08-13T19:21:12.588080
+Initial state saved to: states/experiment_step_000.json
