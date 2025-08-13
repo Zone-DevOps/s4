@@ -1,0 +1,40 @@
+2025-08-13 18:38:30,338 - System4.demo - INFO - Scenario demo initialized
+2025-08-13 18:38:30,345 - System4.demo - INFO - Step 0 completed
+2025-08-13 18:38:30,346 - System4.demo - INFO - Metric relevance: 0.1104
+2025-08-13 18:38:30,346 - System4.demo - INFO - Metric alignment: -0.4408
+2025-08-13 18:38:30,346 - System4.demo - INFO - Step 1 completed
+2025-08-13 18:38:30,347 - System4.demo - INFO - Metric relevance: 0.1242
+2025-08-13 18:38:30,347 - System4.demo - INFO - Metric alignment: -0.7108
+2025-08-13 18:38:30,347 - System4.demo - INFO - Step 2 completed
+2025-08-13 18:38:30,348 - System4.demo - INFO - Metric relevance: 0.1501
+2025-08-13 18:38:30,348 - System4.demo - INFO - Metric alignment: -0.5470
+2025-08-13 18:38:30,348 - System4.demo - INFO - Step 3 completed
+2025-08-13 18:38:30,349 - System4.demo - INFO - Metric relevance: 0.1645
+2025-08-13 18:38:30,349 - System4.demo - INFO - Metric alignment: 0.4461
+2025-08-13 18:38:30,349 - System4.demo - INFO - Step 4 completed
+2025-08-13 18:38:30,350 - System4.demo - INFO - Metric relevance: 0.1555
+2025-08-13 18:38:30,350 - System4.demo - INFO - Metric alignment: -0.4811
+2025-08-13 18:38:30,351 - System4.demo - INFO - Event [cycle_complete]: Completed cycle 0
+2025-08-13 18:38:30,351 - System4.demo - INFO - Step 5 completed
+2025-08-13 18:38:30,352 - System4.demo - INFO - Metric relevance: 0.2745
+2025-08-13 18:38:30,352 - System4.demo - INFO - Metric alignment: -0.8098
+2025-08-13 18:38:30,352 - System4.demo - INFO - Step 6 completed
+2025-08-13 18:38:30,353 - System4.demo - INFO - Metric relevance: 0.1340
+2025-08-13 18:38:30,354 - System4.demo - INFO - Metric alignment: -0.3388
+2025-08-13 18:38:30,354 - System4.demo - INFO - Step 7 completed
+2025-08-13 18:38:30,355 - System4.demo - INFO - Metric relevance: 0.2157
+2025-08-13 18:38:30,355 - System4.demo - INFO - Metric alignment: 0.6840
+2025-08-13 18:38:30,355 - System4.demo - INFO - Step 8 completed
+2025-08-13 18:38:30,357 - System4.demo - INFO - Metric relevance: 0.3715
+2025-08-13 18:38:30,357 - System4.demo - INFO - Metric alignment: -0.1182
+2025-08-13 18:38:30,357 - System4.demo - INFO - Event [cycle_complete]: Completed cycle 1
+2025-08-13 18:38:30,357 - System4.demo - INFO - Step 9 completed
+2025-08-13 18:38:30,359 - System4.demo - INFO - Metric relevance: 0.2724
+2025-08-13 18:38:30,359 - System4.demo - INFO - Metric alignment: -0.8162
+2025-08-13 18:38:30,359 - System4.demo - INFO - Step 10 completed
+2025-08-13 18:38:30,361 - System4.demo - INFO - Metric relevance: 0.3589
+2025-08-13 18:38:30,361 - System4.demo - INFO - Metric alignment: -0.1736
+2025-08-13 18:38:30,361 - System4.demo - INFO - Step 11 completed
+2025-08-13 18:38:30,363 - System4.demo - INFO - Metric relevance: 0.3820
+2025-08-13 18:38:30,363 - System4.demo - INFO - Metric alignment: 0.8444
+2025-08-13 18:38:30,363 - System4.demo - INFO - Transformation complete after 12 steps
